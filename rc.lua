@@ -11,6 +11,7 @@ require("naughty")
 require("debian.menu")
 
 vicious = require("vicious")
+vicious.contrib = require("vicious.contrib")
 scratch = require("scratch")
 
 -- {{{ Error handling
@@ -145,6 +146,34 @@ memwidget = widget({ type = "textbox" })
 vicious.register(memwidget, vicious.widgets.mem, "$1% ($2/$3MB)", 10)
 -- }}}
 
+local function pulse_volume(delta)
+  vicious.contrib.pulse.add(delta, "alsa_output.pci-0000_00_1b.0.analog-stereo")
+  vicious.force({ volwidget })
+end
+
+local function pulse_toggle()
+  vicious.contrib.pulse.toggle("alsa_output.pci-0000_00_1b.0.analog-stereo")
+  vicious.force({ volwidget })
+end
+
+local function pulse_format(widget, args)
+  if args[2] == "off" then 
+    -- volicon.image = image(beautiful.volume_mute_icon)
+    return "X"
+  end
+  return string.format("%.f%%", args[1])
+end
+
+-- {{{ Volume
+volicon = widget({ type = "imagebox" })
+volicon.image = image(beautiful.widget_vol)
+-- Initialize widget
+volwidget = widget({ type = "textbox" })
+-- Register widget
+vicious.register(volwidget, vicious.contrib.pulse, pulse_format, 10,
+    "alsa_output.pci-0000_00_1b.0.analog-stereo")
+-- }}}
+
 -- Create a textclock widget
 mytextclock = awful.widget.textclock({ align = "right" })
 
@@ -232,6 +261,7 @@ for s = 1, screen.count() do
         separator, memwidget, memicon,
         separator, batwidget, baticon,
         separator, cpugraph.widget, cpuicon,
+        separator, volwidget, volicon,
         separator,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -249,6 +279,12 @@ root.buttons(awful.util.table.join(
 
 -- {{{ Key bindings
 globalkeys = awful.util.table.join(
+    -- Volume keyboard control
+    awful.key({ }, "XF86AudioRaiseVolume", function () pulse_volume(5) end),
+    awful.key({ }, "XF86AudioLowerVolume", function () pulse_volume(-5)end),
+    awful.key({ }, "XF86AudioMute", function () pulse_toggle() end),
+    -- end of custom keybindings
+
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
     awful.key({ modkey,           }, "Right",  awful.tag.viewnext       ),
     awful.key({ modkey,           }, "Escape", awful.tag.history.restore),
