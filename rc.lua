@@ -40,10 +40,11 @@ end
 -- }}}
 
 -- {{{ Variable definitions
-local home   = os.getenv("HOME")
+local home = os.getenv("HOME")
 
 -- Themes define colours, icons, and wallpapers
-beautiful.init(home .. "/.config/awesome/theme.lua")
+beautiful.init(awful.util.getdir("config") .. "/theme.lua")
+--beautiful.init("/usr/share/awesome/themes/default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "urxvt"
@@ -257,11 +258,12 @@ for s = 1, screen.count() do
         },
         mylayoutbox[s],
         mytextclock,
-        s == 1 and mysystray or nil,
         separator, memwidget, memicon,
         separator, batwidget, baticon,
         separator, cpugraph.widget, cpuicon,
         separator, volwidget, volicon,
+        separator,
+        s == 1 and mysystray or nil,
         separator,
         mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
@@ -283,6 +285,17 @@ globalkeys = awful.util.table.join(
     awful.key({ }, "XF86AudioRaiseVolume", function () pulse_volume(5) end),
     awful.key({ }, "XF86AudioLowerVolume", function () pulse_volume(-5)end),
     awful.key({ }, "XF86AudioMute", function () pulse_toggle() end),
+
+    awful.key({ modkey }, "e", function ()
+            awful.util.spawn(home ..  "/opt/st3/sublime_text")
+        end),
+    awful.key({ modkey }, "F4", function ()
+            scratch.drop("urxvt", "top", "center", 0.8, 0.6)
+        end),
+    awful.key({ }, "XF86LaunchB", function ()
+            scratch.drop("urxvt", "top", "center", 0.8, 0.6)
+        end),
+
     -- end of custom keybindings
 
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev       ),
@@ -463,4 +476,4 @@ end)
 client.add_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.add_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}
-awful.util.spawn("/usr/bin/wmname LG3D")
+--awful.util.spawn("/usr/bin/wmname LG3D")
